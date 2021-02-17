@@ -1,24 +1,31 @@
 package com.codepath.apps.restclienttemplate;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.res.Configuration;
 import android.media.Image;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.codepath.apps.restclienttemplate.models.Tweet;
 
 import org.w3c.dom.Text;
 
+import java.text.ParseException;
 import java.util.List;
 
-public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder>{
+import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
+
+public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder> {
 
     Context context;
     List<Tweet> tweets;
@@ -44,11 +51,18 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
         Tweet tweet = tweets.get(position);
 
         //Bind the tweet with view holder
-        holder.bind(tweet);
+        try {
+            holder.bind(tweet);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
     }
 
     @Override
-    public int getItemCount() { return tweets.size(); }
+    public int getItemCount() {
+        return tweets.size();
+    }
 
     //Clean all elements of the recycler
     public void clear() {
@@ -63,24 +77,36 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
     }
 
     //Define a viewholder
-    public class ViewHolder extends RecyclerView.ViewHolder{
+    public class ViewHolder extends RecyclerView.ViewHolder {
 
-        ImageView ivPofileImage;
+        ImageView ivProfileImage;
+        ImageView ivMedia;
         TextView tvBody;
         TextView tvScreenName;
+        TextView tvTimestamp;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            ivPofileImage = itemView.findViewById(R.id.ivProfileImage);
+            ivProfileImage = itemView.findViewById(R.id.ivProfileImage);
             tvBody = itemView.findViewById(R.id.tvBody);
             tvScreenName = itemView.findViewById(R.id.tvScreenName);
-
+            tvTimestamp = itemView.findViewById(R.id.tvTimestamp);
+            ivMedia = itemView.findViewById(R.id.ivMedia);
         }
 
-        public void bind(Tweet tweet) {
+        int radius = 80;
+        int margin=2;
+
+
+        public void bind(Tweet tweet) throws ParseException {
             tvBody.setText(tweet.body);
             tvScreenName.setText(tweet.user.screenName);
-            Glide.with(context).load(tweet.user.profileImageUrl).into(ivPofileImage);
+            tvTimestamp.setText(Tweet.getFormattedTimestamp(tweet));
+            Glide.with(context)
+                    .load(tweet.user.profileImageUrl)
+                    .apply(new RequestOptions()
+                            .transform(new RoundedCornersTransformation(radius, margin)))
+                    .into(ivProfileImage);
         }
     }
 }
